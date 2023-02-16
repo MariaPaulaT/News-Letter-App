@@ -5,12 +5,16 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
 const https = require("https");
-const mailChimp = require("@mailchimp/mailchimp_marketing");
+
 const app = express();
 app.use(express.static("public"));
 
 app.use(bodyParser.urlencoded({encoded:true}));
-
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 app.listen(3000, function(){
     console.log("succes");
 })
@@ -24,10 +28,15 @@ app.post("/", function(req, res){
     var lastName = req.body.lname;
     var email = req.body.email;
 
+    console.log("First Name: " + firstName);
+    console.log("Last Name: " + lastName);
+    console.log("Email: " + email);
+
+
     var data ={
         members:{
             email_address: email,
-            status: "suscribed",
+            status: "subscribed",
             merge_fields:{
                 FNAME: firstName,
                 LNAME: lastName
@@ -44,11 +53,19 @@ app.post("/", function(req, res){
     }
 
     const request = https.request(url, options, function(response){
+       
+       if (response.statusCode === 200){
+        res.sendFile(__dirname + "/success.html");
+        
+       }
+       else{
+        res.sendFile(__dirname + "/failure.html");
+       }
         response.on("data", function(data){
             console.log(JSON.parse(data));
         })
     })
 
     request.write(jsonData);
-    request.end;
+    request.end();
 });
