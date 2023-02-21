@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     next();
   });
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-app.listen(3000, function(){
+app.listen(process.env.PORT, function(){
     console.log("succes");
 })
 
@@ -68,4 +68,8 @@ app.post("/", function(req, res){
 
     request.write(jsonData);
     request.end();
+});
+
+app.post("/failure", function (req, res){
+    res.redirect("/");
 });
